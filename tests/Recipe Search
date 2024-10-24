@@ -1,0 +1,153 @@
+import sqlite3
+import unittest
+import os
+
+# RecipeSearchDB class with SQLite integration
+class RecipeSearchDB:
+    def __init__(self, db_path):
+        """
+        Initialize the RecipeSearchDB class with a database connection.
+        :param db_path: The path to the SQLite database file.
+        """
+        self.conn = sqlite3.connect(db_path)
+        self.create_table()
+
+    def create_table(self):
+        """
+        Create the recipes table if it doesn't exist.
+        """
+        with self.conn:
+            self.conn.execute('''CREATE TABLE IF NOT EXISTS recipes (
+                                    id INTEGER PRIMARY KEY,
+                                    title TEXT NOT NULL,
+                                    ingredients TEXT NOT NULL)''')
+
+    def search_recipes(self, keyword):
+        """
+        Search for recipes containing the specified keyword in the title or ingredients.
+        :param keyword: The keyword to search for.
+        :return: A list of matching recipes.
+        """
+        keyword = f'%{keyword}%'
+        cursor = self.conn.execute("SELECT * FROM recipes WHERE title LIKE ? OR ingredients LIKE ?", (keyword, keyword))
+        return cursor.fetchall()
+
+    def add_recipe_to_storage(self, title, ingredients):
+        """
+        Add a new recipe to the database.
+        :param title: The title of the recipe.
+        :param ingredients: A comma-separated string of ingredients.
+        """
+        if not self._recipe_exists(title):
+            with self.conn:
+                self.conn.execute("INSERT INTO recipes (title, ingredients) VALUES (?, ?)", (title, ingredients))
+        else:
+            print(f"Recipe '{title}' already exists.")
+
+    def _recipe_exists(self, title):
+        """
+        Check if a recipe already exists in the database.
+        :param title: The title of the recipe to check.
+        :return: True if the recipe exists, False otherwise.
+        """
+        cursor = self.conn.execute("SELECT 1 FROM recipes WHERE title = ?", (title,))
+        return cursor.fetchone() is not None
+
+    def build_meal_prep_list(self, keywords):
+        """
+        Build a meal prep list by searching for recipes that match multiple keywords.
+        :param keywords: A list of keywords to search for.
+        :return: A list of recipes that match any of the keywords.
+        """
+        meal_prep_list = []
+        for keyword in keywords:
+            meal_prep_list.extend(self.search_recipes(keyword))
+        return meal_prep_list
+
+    def close(self):
+        """
+        Close the database connection.
+        """
+        self.conn.close()
+
+
+# Unit tests for the RecipeSearchDB class
+class TestRecipeSearchDB(unittest.TestCase):
+
+    def setUp(self):
+        """
+        This method is called before each test. It sets up a temporary SQLite database for testing.
+        """
+        self.db_path = 'test_recipes.db'
+        self.recipe_search_db = RecipeSearchDB(self.db_path)
+
+        # Add some initial data to the test database
+        self.recipe_search_db.add_recipe_to_storage('Spaghetti Bolognese', 'spaghetti, ground beef, tomato sauce')
+        self.recipe_search_db.add_recipe_to_storage('Chicken Salad', 'chicken, lettuce, tomatoes, cucumbers')
+
+    def tearDown(self):
+        """
+        This method is called after each test. It closes the database connection and removes the test database file.
+        """
+        self.recipe_search_db.close()
+        os.remove(self.db_path)  # Remove the database file after testing
+
+    def test_search_recipes_by_keyword_in_title(self):
+        """
+        Test searching for a recipe by keyword in the title.
+        """
+        results = self.recipe_search_db.search_recipes('Spaghetti')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0][1], 'Spaghetti Bolognese')
+
+    def test_search_recipes_by_keyword_in_ingredients(self):
+        """
+        Test searching for a recipe by keyword in the ingredients.
+        """
+        results = self.recipe_search_db.search_recipes('chicken')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0][1], 'Chicken Salad')
+
+    def test_search_recipes_no_match(self):
+        """
+        Test searching for a keyword that does not match any recipe.
+        """
+        results = self.recipe_search_db.search_recipes('pizza')
+        self.assertEqual(len(results), 0)
+
+    def test_add_recipe_to_storage(self):
+        """
+        Test adding a new recipe to storage.
+        """
+        self.recipe_search_db.add_recipe_to_storage('Pancakes', 'flour, eggs, milk')
+        results = self.recipe_search_db.search_recipes('Pancakes')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0][1], 'Pancakes')
+
+    def test_add_recipe_already_exists(self):
+        """
+        Test trying to add a recipe that already exists in storage.
+        """
+        self.recipe_search_db.add_recipe_to_storage('Chicken Salad', 'chicken, lettuce, tomatoes, cucumbers')
+        results = self.recipe_search_db.search_recipes('Chicken Salad')
+        self.assertEqual(len(results), 1)  # It should not add the duplicate
+
+    def test_build_meal_prep_list(self):
+        """
+        Test building a meal prep list with multiple keywords.
+        """
+        meal_prep_list = self.recipe_search_db.build_meal_prep_list(['chicken', 'spaghetti'])
+        self.assertEqual(len(meal_prep_list), 2)
+
+    def test_build_meal_prep_list_with_non_existent_recipe(self):
+        """
+        Test building a meal prep list where some keywords don't match any recipe.
+        """
+        meal_prep_list = self.recipe_search_db.build_meal_prep_list(['pizza', 'spaghetti'])
+        self.assertEqual(len(meal_prep_list), 1)
+        self.assertEqual(meal_prep_list[0][1], 'Spaghetti Bolognese')
+
+
+# This is the part that actually runs the tests when this file is executed.
+if __name__ == '__main__':
+    unittest.main()
