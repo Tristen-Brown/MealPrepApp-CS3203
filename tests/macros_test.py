@@ -1,5 +1,6 @@
+import unittest
 import time
-import pytest
+import pytest # TODO: May want to switch to using unittest instead
 
 # Main MacrosCalculator class with the four units of functionality.
 class MacrosCalculator:
@@ -119,4 +120,4 @@ def test_macronutrient_boundaries_above_boundary():
 
 # Run the main function.
 if __name__ == "__main__":
-    main()
+    unittest.main()
