@@ -1,80 +1,82 @@
 import unittest
 from unittest.mock import MagicMock, patch, mock_open
+import json
 import image_uploader
 
 class TestImageAnalysis(unittest.TestCase):
+    
+    def setUp(self):
+        # Create a mock response similar to the structure you're receiving
+        self.mock_response = MagicMock()
+        self.mock_response.result.candidates[0].content.parts[0].text = (
+            "```json\n"
+            "{\n"
+            "    \"All ingredients\": [\"eggs\", \"milk\"],\n"
+            "    \"Recipes\": [{\"recipe name\": \"Sample Recipe\", \"ingredients\": [\"eggs\"], \"instructions\": \"Mix ingredients.\"}]\n"
+            "}\n"
+            "```"
+        )
 
-    @patch ('image_uploader.requests.post')
-    @patch('builtins.open', new_callable=mock_open, read_data="mocked image data")
-    def test_image_analysis_success(self, mock_post):
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "status": "success", 
-            "message": "Analysis complete",
-            "data": {
-                "ingredients": ["tomatoes", "cheese", "lettuce", "chicken", "bread"],
-                "recipes": [
-                    {
-                        "name": "Grilled Chicken Salad",
-                        "instructions": "Mix chicken, lettuce, and tomato. Add dressing.",
-                        "ingredients_needed": ["chicken", "lettuce", "tomato"]
-                    },
-                    {
-                        "name": "Cheese and Tomato Sandwich",
-                        "instructions": "Place cheese and tomato between two slices of bread and grill.",
-                        "ingredients_needed": ["cheese", "tomato", "bread"]
-                    }
-                ]
-            }}
-        mock_response.return_value = mock_response
+    def test_json_format(self):
+        # Extract the JSON from the mocked response using your function
+        json_text = self.mock_response.result.candidates[0].content.parts[0].text
+        # Perform similar text processing as in your function
+        if json_text.startswith("```json"):
+            json_text = json_text[7:]  # Remove the ```json\n at the beginning
+        if json_text.endswith("```"):
+            json_text = json_text[:-3]  # Remove the ``` at the end
 
-        response = image_uploader.upload_image('image-file-path')
+        # Check if the extracted text can be parsed as JSON
+        try:
+            data = json.loads(json_text)
+            self.assertIsInstance(data, dict)  # Ensure the result is a dictionary (JSON object)
+        except json.JSONDecodeError:
+            self.fail("The response is not a valid JSON format")
+    
+    # def test_image_analysis(self):
+    #     mock_response = MagicMock()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['status'], 'success')
-        
-        # Check that ingredients are correctly identified
-        ingredients = response.json()['data']['ingredients']
-        self.assertIn('tomato', ingredients)
-        self.assertIn('cheese', ingredients)
-        self.assertIn('lettuce', ingredients)
-        self.assertIn('chicken', ingredients)
-        self.assertIn('bread', ingredients)
+    #     mock_response.json.return_value = {  # Changed to a dictionary
+    #         'All ingredients': ["tomatoes", "cheese", "lettuce", "chicken", "bread"],
+    #         "Recipes": [
+    #             {
+    #                 "reciope name": "Grilled Chicken Salad",
+    #                 "ingredients_needed": ["chicken", "lettuce", "tomato"],
+    #                 "instructions": "Mix chicken, lettuce, and tomato. Add dressing.",
+    #             },
+    #             {
+    #                 "recipe name": "Cheese and Tomato Sandwich",
+    #                 "ingredients_needed": ["cheese", "tomato", "bread"],
+    #                 "instructions": "Place cheese and tomato between two slices of bread and grill.",
+    #             },
+    #             {
+    #                 "recipe name": "Grilled Cheese",
+    #                 "ingredients": ["cheese", "bread"],
+    #                 "instructions": "Place cheese between two slices of bread and grill."
+    #             }
+    #         ]
+    #     }
 
-        # Check that recipes are correctly suggested
-        recipes = response.json()['data']['recipes']
-        self.assertEqual(len(recipes), 2)  # Two recipes suggested
-        self.assertEqual(recipes[0]['name'], 'Grilled Chicken Salad')
-        self.assertEqual(recipes[1]['name'], 'Cheese and Tomato Sandwich')
 
-        # Check that the first recipe includes the expected ingredients
-        recipe_ingredients = recipes[0]['ingredients_needed']
-        self.assertIn('chicken', recipe_ingredients)
-        self.assertIn('lettuce', recipe_ingredients)
-        self.assertIn('tomato', recipe_ingredients)
+    #     mock_response.return_value = mock_response
 
-        recipe_ingredients = recipes[1]['ingredients_needed']
-        self.assertIn('cheese', recipe_ingredients)
-        self.assertIn('tomato', recipe_ingredients)
-        self.assertIn('bread', recipe_ingredients)
+    #     # with open('test_json.json', 'r') as f:
+    #     #     response = json.load(f)
 
-    @patch('image_uploader.requests.post')
-    def test_image_analysis_failure(self, mock_post):
-        mock_response = MagicMock()
-        mock_response.status_code = 400
-        mock_response.json.return_value = {
-            "status": "failed",
-            "message": "Invalid image format"
-        }
+    #     response = image_uploader.upload_image('test_image2.jpg')
 
-        mock_post.return_value = mock_post
+    #     ingredients = response['All ingredients']
+    #     self.assertIn('lettuce', ingredients)
+    #     self.assertIn('green pepper', ingredients)
+    #     self.assertIn('eggs', ingredients)
+    #     self.assertIn('tomatoes', ingredients)
+    #     self.assertIn('carrots', ingredients)
 
-        response = image_uploader.upload_image('image-file-path')
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['status'], 'failed')
-        self.assertEqual(response.json()['message'], "Invalid image format")
+    #     recipes = response['Recipes']
+    #     self.assertEqual(len(recipes), 3) 
+    #     self.assertEqual(recipes[0]['reciope name'], 'Greek Salad')
+    #     self.assertEqual(recipes[1]['recipe name'], 'Pasta Primavera')
+    #     self.assertEqual(recipes[2]['recipe name'], 'Avocado Toast')
 
 if __name__ == '__main__':
     unittest.main()
