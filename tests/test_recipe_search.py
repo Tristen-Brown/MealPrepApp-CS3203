@@ -1,4 +1,5 @@
 import unittest
+from RecipeSearch import RecipeSearch
 
 class TestRecipeApp(unittest.TestCase):
     def setUp(self):

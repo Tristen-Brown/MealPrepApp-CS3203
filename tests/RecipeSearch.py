@@ -1,4 +1,4 @@
-class RecipeSerch:
+class RecipeSearch:
     def __init__(self):
         self.recipes = []
 
