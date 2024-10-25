@@ -1,6 +1,6 @@
 import unittest
 import time
-import pytest # TODO: May want to switch to using unittest instead
+import pytest
 
 # Main MacrosCalculator class with the four units of functionality.
 class MacrosCalculator:
