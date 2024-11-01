@@ -13,7 +13,7 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 
 def upload_image(file_path):
     myimage = genai.upload_file(file_path)
-    prompt = [myimage, "\n\n", """Identify all ingredients in the image and list three recipes you make with them in JSON format. 
+    prompt = [myimage, "\n\n", """Identify all ingredients in the image and list three recipes you can make with them in JSON format. 
             
     Use this JSON schema:
     {
@@ -44,18 +44,3 @@ def upload_image(file_path):
 
 text_response = upload_image('test_image2.jpg')
 print(text_response)
-
-# myimage = genai.upload_file('test_image2.jpg')
-# prompt = [myimage, "\n\n", """Identify all ingredients in the image and list three recipes you make with them in JSON format. 
-            
-#     Use this JSON schema:
-#     {
-#         All ingredients: list(str)
-#         Recipes: [
-#             {'recipe name': str, 'ingredients': list[str], 'instructions': str}
-#         ]
-#     }
-
-#     Return: list[Ingredients, Recipe]"""]
-# response = model.generate_content(prompt)
-# print(response)

@@ -32,51 +32,6 @@ class TestImageAnalysis(unittest.TestCase):
             self.assertIsInstance(data, dict)  # Ensure the result is a dictionary (JSON object)
         except json.JSONDecodeError:
             self.fail("The response is not a valid JSON format")
-    
-    # def test_image_analysis(self):
-    #     mock_response = MagicMock()
-
-    #     mock_response.json.return_value = {  # Changed to a dictionary
-    #         'All ingredients': ["tomatoes", "cheese", "lettuce", "chicken", "bread"],
-    #         "Recipes": [
-    #             {
-    #                 "reciope name": "Grilled Chicken Salad",
-    #                 "ingredients_needed": ["chicken", "lettuce", "tomato"],
-    #                 "instructions": "Mix chicken, lettuce, and tomato. Add dressing.",
-    #             },
-    #             {
-    #                 "recipe name": "Cheese and Tomato Sandwich",
-    #                 "ingredients_needed": ["cheese", "tomato", "bread"],
-    #                 "instructions": "Place cheese and tomato between two slices of bread and grill.",
-    #             },
-    #             {
-    #                 "recipe name": "Grilled Cheese",
-    #                 "ingredients": ["cheese", "bread"],
-    #                 "instructions": "Place cheese between two slices of bread and grill."
-    #             }
-    #         ]
-    #     }
-
-
-    #     mock_response.return_value = mock_response
-
-    #     # with open('test_json.json', 'r') as f:
-    #     #     response = json.load(f)
-
-    #     response = image_uploader.upload_image('test_image2.jpg')
-
-    #     ingredients = response['All ingredients']
-    #     self.assertIn('lettuce', ingredients)
-    #     self.assertIn('green pepper', ingredients)
-    #     self.assertIn('eggs', ingredients)
-    #     self.assertIn('tomatoes', ingredients)
-    #     self.assertIn('carrots', ingredients)
-
-    #     recipes = response['Recipes']
-    #     self.assertEqual(len(recipes), 3) 
-    #     self.assertEqual(recipes[0]['reciope name'], 'Greek Salad')
-    #     self.assertEqual(recipes[1]['recipe name'], 'Pasta Primavera')
-    #     self.assertEqual(recipes[2]['recipe name'], 'Avocado Toast')
 
 if __name__ == '__main__':
     unittest.main()
