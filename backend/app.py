@@ -4,7 +4,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # This enables CORS, allowing your Flutter app to make requests
 
-# Function to test API calls to the frontend (Flutter)
 @app.route('/hello', methods=['GET'])
 def hello():
     return jsonify(message="Hello from Flask!")
