@@ -4,6 +4,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # This enables CORS, allowing your Flutter app to make requests
 
+# TODO Write function that converts Gemini response to JSON to send to Flutter
+
 @app.route('/hello', methods=['GET'])
 def hello():
     return jsonify(message="Hello from Flask!")

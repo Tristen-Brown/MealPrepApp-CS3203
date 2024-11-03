@@ -6,6 +6,7 @@ __pycache__
 backend/venv/
 backend/__pycache__/
 backend/tests/__pycache__/
+backend/utils/__pycache__/
 
 # Miscellaneous
 *.class

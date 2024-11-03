@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch, mock_open
 import json
-import image_uploader
+import backend.utils.scan_image as scan_image
 
 class TestImageAnalysis(unittest.TestCase):
     
