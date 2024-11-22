@@ -1,21 +1,49 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from utils.scan_image import identify_ingredients
+import uuid
 
 app = Flask(__name__)
 CORS(app)  # This enables CORS, allowing your Flutter app to make requests
 
-# TODO Write function that converts Gemini response to JSON to send to Flutter
-
+# Tests communication between Flutter and Flask
 @app.route('/hello', methods=['GET'])
 def hello():
     return jsonify(message="Hello from Flask!")
 
-# Example POST endpoint
-@app.route('/data', methods=['POST'])
-def receive_data():
+image_data = {}
+
+# Get image from frontend. Process and return JSON response
+@app.route('/api/images/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+    
+    image = request.files('image')
+    ingredients = identify_ingredients(image)
+
+    image_id = str(uuid.uuid4())
+    image_data[image_id] = {
+        'ingredients': ingredients,
+        'recipes': None  # Placeholder until recipes are generated
+    }
+
+    return jsonify({'image_id': image_id, 'ingredients': ingredients}), 200
+
+@app.route('/api/images/update-ingredients', methods=['POST'])
+def update_ingredients():
     data = request.get_json()
-    # Process data here (e.g., save to database, perform calculations)
-    return jsonify(status="success", received_data=data)
+    image_id = data.get('image_id')
+    updated_ingredients = data.get('ingredients')
+
+    if not image_id or not updated_ingredients:
+        return jsonify({'error': 'Missing image_id or ingredients'}), 400
+    
+    if image_id in image_data:
+        image_data[image_id]['ingredients'] = updated_ingredients
+        return jsonify({'message': 'Ingredients updated successfully'}), 200
+    else:
+        return jsonify({'error': 'Image not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'hello.dart';
+// import 'hello.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      fetchHello();
+      // fetchHello(); // Used to test communication between Flutter and Flask
       _counter++;
     });
   }
