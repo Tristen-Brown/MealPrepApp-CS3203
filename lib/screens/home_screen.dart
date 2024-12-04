@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'macros_calculator_screen.dart';
+import 'add_recipe_screen.dart';
+import 'recipe_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,26 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text("Go to Macros Calculator"),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddRecipeScreen()),
+                );
+              },
+              child: const Text("Add Recipe"),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RecipeListScreen()),
+                );
+              },
+              child: const Text("View Saved Recipes"),
             ),
           ],
         ),
