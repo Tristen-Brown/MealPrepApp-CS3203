@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:http_parser/http_parser.dart';
+import '../services/recipe_manager.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   const AddRecipeScreen({super.key});
@@ -92,11 +93,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       return;
     }
 
-    // Here, you could save the recipe to a backend or local storage
-    print("Recipe saved:");
-    print("Name: $recipeName");
-    print("Ingredients: ${ingredients.join(", ")}");
-    print("Instructions: ${instructions.join(", ")}");
+    // Save the recipe using RecipeManager
+    RecipeManager().addRecipe(
+      recipeName,
+      ingredients.join(", "),
+      instructions.join(". "),
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Recipe saved successfully!")),
@@ -116,7 +118,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Manual Recipe Input Section
               const Text("Manual Recipe Input:"),
               TextField(
                 controller: _recipeNameController,
@@ -134,10 +135,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     decoration: const InputDecoration(
                       labelText: "Ingredient",
                     ),
-                    onSubmitted: (_) {
-                      addIngredientField();
-                      FocusScope.of(context).requestFocus(FocusNode());
-                    },
                   ),
                 );
               }).toList(),
@@ -156,10 +153,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     decoration: const InputDecoration(
                       labelText: "Instruction",
                     ),
-                    onSubmitted: (_) {
-                      addInstructionField();
-                      FocusScope.of(context).requestFocus(FocusNode());
-                    },
                   ),
                 );
               }).toList(),
@@ -175,35 +168,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   child: const Text("Save Recipe"),
                 ),
               ),
-
-              const SizedBox(height: 20),
-              const Divider(),
-              const SizedBox(height: 20),
-
-              // AI Recipe Generation Section
-              const Text("AI Recipe Generation:"),
-              Center(
-                child: Column(
-                  children: [
-                    if (_selectedImageBytes != null)
-                      Image.memory(
-                        _selectedImageBytes!,
-                        height: 200,
-                        width: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    TextButton.icon(
-                      onPressed: pickAndSendImage,
-                      icon: const Icon(Icons.image),
-                      label: const Text("Upload Image"),
-                    ),
-                    ElevatedButton(
-                      onPressed: _selectedImageBytes != null ? () => sendImageToServer(_selectedImageBytes!) : null,
-                      child: const Text("Generate Recipe Suggestions"),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -211,6 +175,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     );
   }
 }
+
 
 // import 'package:flutter/material.dart';
 // import 'package:shared_preferences/shared_preferences.dart';

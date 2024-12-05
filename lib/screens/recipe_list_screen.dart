@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/recipe_manager.dart';
 
 class RecipeListScreen extends StatefulWidget {
   const RecipeListScreen({super.key});
@@ -8,42 +9,19 @@ class RecipeListScreen extends StatefulWidget {
 }
 
 class _RecipeListScreenState extends State<RecipeListScreen> {
-  // Simulated recipe storage
-  List<Map<String, String>> recipes = [
-    {
-      "name": "Spaghetti Bolognese",
-      "ingredients": "Spaghetti, Ground Beef, Tomato Sauce, Onion, Garlic",
-      "instructions": "Cook spaghetti. Cook beef with onion and garlic. Add sauce.",
-    },
-    {
-      "name": "Grilled Chicken Salad",
-      "ingredients": "Chicken Breast, Lettuce, Tomato, Cucumber, Olive Oil",
-      "instructions": "Grill chicken. Chop veggies. Mix with olive oil.",
-    },
-    {
-      "name": "Garlic Bread",
-      "ingredients": "Bread, Butter, Garlic, Parsley",
-      "instructions": "Spread garlic butter on bread. Toast in oven.",
-    },
-  ];
-
-  // List for search results
   List<Map<String, String>> filteredRecipes = [];
-
-  // Text editing controller for search input
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    filteredRecipes = recipes; // Initially display all recipes
+    filteredRecipes = RecipeManager().getRecipes();
   }
 
-  // Search function
   void searchRecipes(String query) {
     final lowerCaseQuery = query.toLowerCase();
     setState(() {
-      filteredRecipes = recipes.where((recipe) {
+      filteredRecipes = RecipeManager().getRecipes().where((recipe) {
         final name = recipe["name"]!.toLowerCase();
         final ingredients = recipe["ingredients"]!.toLowerCase();
         return name.contains(lowerCaseQuery) || ingredients.contains(lowerCaseQuery);
@@ -51,11 +29,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     });
   }
 
-  // Method to delete a recipe
   void deleteRecipe(int index) {
+    RecipeManager().deleteRecipe(index);
     setState(() {
-      recipes.removeAt(index);
-      filteredRecipes = recipes;
+      filteredRecipes = RecipeManager().getRecipes();
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Recipe deleted successfully!")),
@@ -163,4 +140,3 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     );
   }
 }
-
