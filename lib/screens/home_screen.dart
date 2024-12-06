@@ -3,6 +3,8 @@ import 'macros_calculator_screen.dart';
 import 'add_recipe_screen.dart';
 import 'recipe_list_screen.dart';
 import 'meal_recommendation_screen.dart';  // Import the new screen
+//import 'meal_prep_list_screen.dart';
+import 'meal_plan_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -55,6 +57,33 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text("Get Meal Recommendations"),
+            // ), const SizedBox(height: 10), 
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => const MealPlanInputScreen()),
+            //     );
+            //   },
+            //   child: const Text("Go to Meal Plan Validator"),
+            // ), const SizedBox(height: 10), 
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => const MealPlanScreen()),
+            //     );
+            //   },
+            // child: const Text("Meal Plan Validator"),
+            ), const SizedBox(height: 10), 
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MealPlanScreen()),
+                );
+              },
+            child: const Text("Create Meal Plan"),
             ),
           ],
         ),

@@ -9,7 +9,6 @@ from werkzeug.utils import secure_filename
 import utils.scan_image as scan_image
 import re
 
-
 # Load environment variables from the specified file
 load_dotenv(dotenv_path="api.env")
 
@@ -132,8 +131,62 @@ def generate_recipes():
         print(f"Error generating recipes: {e}")
         return jsonify({"error": "Failed to generate recipes", "recipe": []}), 500
 
+MAX_RESTRICTION_LENGTH = 10  # Allow max 10 restrictions
 
+class DietaryRestrictions:
+    def __init__(self):
+        # List of valid dietary restrictions
+        self.valid_restrictions = ["vegan", "gluten-free", "dairy-free", "keto", "paleo", "nut-free"]
 
+    def validate_restrictions(self, restrictions):
+        # Split and strip input restrictions by commas
+        restriction_list = [r.strip() for r in restrictions.split(",")]
+
+        # Check that all input restrictions are valid
+        for r in restriction_list:
+            if r not in self.valid_restrictions:
+                return False
+        
+        # Check if there are more than the allowed maximum restrictions
+        return len(restriction_list) <= MAX_RESTRICTION_LENGTH
+
+# Route to validate dietary restrictions
+@app.route('/validate_dietary_restrictions', methods=['POST'])
+def validate_dietary_restrictions():
+    data = request.get_json()  # Expecting JSON with dietary restrictions
+    restrictions = data.get('restrictions', "")
+
+    # Initialize the DietaryRestrictions class
+    dietary_restrictions = DietaryRestrictions()
+
+    # Validate the restrictions
+    is_valid = dietary_restrictions.validate_restrictions(restrictions)
+
+    if is_valid:
+        return jsonify({"status": "success", "message": "Valid dietary restrictions"})
+    else:
+        return jsonify({"status": "error", "message": "Invalid dietary restrictions or too many restrictions"})
+
+MAX_MEALS_PER_DAY = 3
+MAX_EATING_OUT_DAYS = 1
+
+def validate_meal_plan(meal_plan):
+    eating_out_count = sum(1 for meals in meal_plan if meals == 0)
+    if eating_out_count > MAX_EATING_OUT_DAYS:
+        return False, "Too many eating out days. Only one is allowed."
+    if any(meals != 0 and not (2 <= meals <= MAX_MEALS_PER_DAY) for meals in meal_plan):
+        return False, "Invalid meal selection. Meals per day must be 2 or 3 (or 0 for eating out)."
+    return True, "Valid meal plan."
+
+@app.route('/validate_meal_plan', methods=['POST'])
+def validate_meal_plan_api():
+    data = request.get_json()
+    meal_plan = data.get('meal_plan', [])
+    if not meal_plan or len(meal_plan) != 7:
+        return jsonify(success=False, message="Invalid input. Provide meal plan for 7 days."), 400
+
+    is_valid, message = validate_meal_plan(meal_plan)
+    return jsonify(success=is_valid, message=message)
 
 
     
