@@ -23,6 +23,7 @@ def parse_response(response):
     if json_text.endswith("```"):
         json_text = json_text[:-3]
 
+    json_data = {}
     # Load cleaned JSON string into dictionary
     try:
         json_data = json.loads(json_text)
@@ -35,10 +36,10 @@ def parse_response(response):
 def identify_ingredients(file_path):
     user_image = genai.upload_file(file_path)
     prompt = [user_image, "\n\n", """
-        Identify all ingredients in the image. IMPORTANT: The output should be in JSON format.
+        Identify all ingredients in the image. IMPORTANT: The output should be in JSON format. Do not add any new line characters to the output.
 
         If some of the ingredients are unidentifiable, ignore them and only add what you can confidently identify.
-        If there are no ingredients, just leave the ingredients list empty.
+        If there are no ingredients, just leave the ingredients list empty. 
         
         Example output:
         
@@ -46,30 +47,31 @@ def identify_ingredients(file_path):
     """]
 
     model_response = model.generate_content(prompt)
+    print(model_response)
     ingredients_list = parse_response(model_response)
     return ingredients_list
 
-def generate_recipe_suggesetions(ingredients):
+def generate_recipe_suggestions(ingredients):
     prompt = ["""
-        With the list of given ingredients below, generate three recipe suggestions. List all ingredients required for each recipe. Provide instructions.
+        With the list of given ingredients below, generate one recipe suggestion.
+        Give the name, ingredients, and instructions.
         
-        IMPORTANT: The output should be in JSON format.
+        IMPORTANT: The output must be in strict JSON format, without any additional text. NO NEWLINE CHARACTERS
               
         Example output:
               
-        {"recipes": [{"recipe name": "Recipe 1 Name, "ingredients": ["ingredient 1", "ingredient 2", "ingredient 3"], "instructions": ["Step 1", "Step 2", "Step 3]},
-            {"recipe name": "Recipe 2 Name, "ingredients": ["ingredient 1", "ingredient 2", "ingredient 3"], "instructions": ["Step 1", "Step 2", "Step 3]},
-            {"recipe name": "Recipe 3 Name, "ingredients": ["ingredient 1", "ingredient 2", "ingredient 3"], "instructions": ["Step 1", "Step 2", "Step 3]}
-        ]}\n\n
+        {"recipe name": "Recipe 1 Name", "ingredients": ["ingredient 1", "ingredient 2", "ingredient 3"], "instructions": ["Step 1", "Step 2", "Step 3"]}
     """]
 
     for item in ingredients:
-        prompt += f"{item}\n"
+        prompt.append(f"{item}\n")
 
     model_response = model.generate_content(prompt)
+    print(model_response)
     recipe_suggestions = parse_response(model_response)
     return recipe_suggestions
 
-# ingredients = identify_ingredients("test_image2.jpg")
-# recipes = generate_recipe_suggesetions(ingredients)
-# print(recipes)
+
+ingredients = identify_ingredients("food-pantry-1.jpg")
+recipes = generate_recipe_suggestions(ingredients)
+print(recipes)

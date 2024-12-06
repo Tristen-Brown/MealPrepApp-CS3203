@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'macros_calculator_screen.dart';
 import 'add_recipe_screen.dart';
 import 'recipe_list_screen.dart';
+import 'meal_recommendation_screen.dart';  // Import the new screen
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -44,6 +45,16 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text("View Saved Recipes"),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MealRecommendationScreen()),
+                );
+              },
+              child: const Text("Get Meal Recommendations"),
             ),
           ],
         ),
